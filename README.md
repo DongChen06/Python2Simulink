@@ -6,6 +6,10 @@ This file aims to Call Simulink module with Python.
 
 Install the MATLAB Engine API follow the instruction [Installation](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html).
 
+## Applications
+1. plant example
+2. tracking example
+
 
 ## API
 - matlab.engine.start_matlab():
