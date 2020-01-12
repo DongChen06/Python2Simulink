@@ -3,15 +3,21 @@ A bridge between Python and Simulink
 This file aims to Call Simulink module with Python.
 
 ## Install MATLAB Engine API for Python
-[Installation](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html)
+
+Install the MATLAB Engine API follow the instruction [Installation](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html).
 
 
 ## API
-matlab.engine.start_matlab()
-eng.eval("model = '{}'".format(self.modelName),nargout=0)
-eng.eval('out.output')
-eng.workspace()
-eng.set_param(self.modelName,'SimulationCommand','start','SimulationCommand','pause',nargout=0)
+- matlab.engine.start_matlab():
+start the engine
+
+- eng.eval("model = '{}'".format(self.modelName),nargout=0)
+
+- eng.eval('out.output')
+
+- eng.workspace()
+
+- eng.set_param(self.modelName,'SimulationCommand','start','SimulationCommand','pause',nargout=0)
 
 
 
