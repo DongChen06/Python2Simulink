@@ -42,6 +42,9 @@ out = self.eng.workspace['out']
 self.eng.eval('out.output'), self.eng.eval('out.tout')
 ```
 
+- set_param
+
+learn how to set parameters of blocks [check here](https://www.mathworks.com/help/simulink/slref/set_param.html)
 
 ## Reference:
 1. [link1](https://stackoverflow.com/questions/48864281/executing-step-by-step-a-simulink-model-from-python)
