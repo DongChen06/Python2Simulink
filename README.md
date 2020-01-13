@@ -12,17 +12,27 @@ Install the MATLAB Engine API follow the instruction [Installation](https://www.
 
 
 ## API
-- matlab.engine.start_matlab():
-start the engine
+- start the engine and connect to Matlab; Load the model:
 
-- eng.eval("model = '{}'".format(self.modelName),nargout=0)
+`matlab.engine.start_matlab()`
+
+`self.eng.eval("model = '{}'".format(self.modelName),nargout=0)`
+
+`self.eng.eval("load_system(model)",nargout=0)`
 
 - eng.eval('out.output')
 
 - eng.workspace()
 
-- eng.set_param(self.modelName,'SimulationCommand','start','SimulationCommand','pause',nargout=0)
+- self.eng.set_param('{}/u'.format(self.modelName),'value',str(u),nargout=0): set the control input u.
 
+- Start Simulation and then Instantly pause and read output.
+
+```
+eng.set_param(self.modelName,'SimulationCommand','start','SimulationCommand','pause',nargout=0)
+out = self.eng.workspace['out']
+self.eng.eval('out.output'), self.eng.eval('out.tout')
+```
 
 
 ## Reference:
