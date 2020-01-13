@@ -9,7 +9,7 @@ Install the MATLAB Engine API follow the instruction [Installation](https://www.
 ## Applications
 1. plant example
 
-In this example, we 
+In this example, we build a PI controller to regulate a secord-order system to a reference value (10 here). The Python script compute the control input and sends then value to the Simulink model. Then Simulink model runs for one step and returns the output value to the python script. 
 
 <p align="center">
      <img src="Docs/plant.gif" alt="output_example" width="60%" height="60%">
