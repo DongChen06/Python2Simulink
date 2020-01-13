@@ -8,6 +8,14 @@ Install the MATLAB Engine API follow the instruction [Installation](https://www.
 
 ## Applications
 1. plant example
+
+In this example, we 
+
+<p align="center">
+     <img src="Docs/plant.gif" alt="output_example" width="60%" height="60%">
+     <br>Fig.1 Figure of regulation result
+</p>
+
 2. tracking example
 
 
