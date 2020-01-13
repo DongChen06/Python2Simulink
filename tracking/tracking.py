@@ -10,7 +10,6 @@ class Simulink2Python:
 
     def setControlAction(self, u1, u2):
         # Helper Function to set value of control action
-        #self.eng.set_param(self.modelName, '{}/u1'.format(self.modelName), str(u1), nargout=0)
         self.eng.set_param('{}/u1'.format(self.modelName), 'value', str(u1), nargout=0)
         self.eng.set_param('{}/u2'.format(self.modelName), 'value', str(u2), nargout=0)
 
@@ -56,7 +55,7 @@ class Simulink2Python:
         self.eng.quit()
 
 
-class PIController:
+class Controller:
     def __init__(self):
         # Maintain a History of Variables
         self.x1Hist = []
@@ -102,7 +101,7 @@ class PIController:
 
         self.updateGraph()
 
-        # Set Point for x1 and x2
+        # Set Point for x1 and x2 and compute the error terms
         xd1 = np.sin(self.t) + 0.1
         xd2 = -np.cos(0.5 * self.t) - 0.1
         e1 = self.x1 - xd1
@@ -128,7 +127,7 @@ tracker = Simulink2Python(modelName="tracking1")
 tracker.connectToMatlab()
 
 # Instantiates the controller
-controller = PIController()
+controller = Controller()
 tracker.connectController(controller)
 
 # Control Loop
