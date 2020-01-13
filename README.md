@@ -31,7 +31,7 @@ where the u1 and u2 are control input from the Python script. The state variable
 
 <p align="center">
      <img src="Docs/tracking.gif" alt="output_example" width="60%" height="60%">
-     <br>Fig.3 Figure of tracking result, x1(blue) and xd1(orange)
+     <br>Fig.3 Tracking result, x1(blue) and xd1(orange)
 </p>
 
 
