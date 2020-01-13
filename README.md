@@ -18,9 +18,18 @@ In this example, we build a PI controller to regulate a secord-order system to a
 
 2. tracking example
 
+In this example, the controller tries to control the variables x1 and x2 to a regulate track xd1 and xd2. The simulink model looks like this,
+
+<p align="center">
+     <img src="Docs/simulink_model.png" alt="output_example" width="60%" height="60%">
+     <br>Fig.2 simulink model
+</p>
+
+where the u1 and u2 are control input from the Python script. The state variables x1 and x2 will be sent to the python script. 
+
 <p align="center">
      <img src="Docs/tracking.gif" alt="output_example" width="60%" height="60%">
-     <br>Fig.1 Figure of tracking result
+     <br>Fig.3 Figure of tracking result, x1(blue) and xd1(orange)
 </p>
 
 
