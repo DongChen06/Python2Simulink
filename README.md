@@ -18,6 +18,11 @@ In this example, we build a PI controller to regulate a secord-order system to a
 
 2. tracking example
 
+<p align="center">
+     <img src="Docs/tracking.gif" alt="output_example" width="60%" height="60%">
+     <br>Fig.1 Figure of tracking result
+</p>
+
 
 ## API
 - start the engine and connect to Matlab; Load the model:
