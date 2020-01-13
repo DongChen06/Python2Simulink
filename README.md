@@ -18,7 +18,9 @@ In this example, we build a PI controller to regulate a secord-order system to a
 
 2. tracking example
 
-In this example, the controller tries to control the variables x1 and x2 to a regulate track xd1 and xd2. The simulink model looks like this,
+In this example, the controller tries to control the variables x1 and x2 to a regulate track xd1 and xd2. There is also a code-like model and controller built by [Matlab code](tracking/linear_controller.m).
+
+The simulink model looks like this,
 
 <p align="center">
      <img src="Docs/simulink_model.png" alt="output_example" width="60%" height="60%">
