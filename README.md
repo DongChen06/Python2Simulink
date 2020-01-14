@@ -1,4 +1,4 @@
-# Python2Simulink
+Python2Simulink
 ===============
 #### Robotics and Intelligent Vehicle Automation Lab (RIVAL)
 - Built by Dong Chen
@@ -8,10 +8,13 @@ A bridge between Python and Simulink.
 This file aims to build a bridge between Python and Simulink. At each time step, the python script will send a command (input) to the simulink model, then the simulink model executes for one step and then returns the results to Python scripts for the decision usage. 
 
 ## Install MATLAB Engine API for Python
+-------
 
 Install the MATLAB Engine API follow the instruction [Installation](https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html).
 
 ## Applications
+-------
+
 1. plant example
 
 In this example, we build a PI controller to regulate a secord-order system to a reference value (10 here). The Python script compute the control input and sends then value to the Simulink model. Then Simulink model runs for one step and returns the output value to the python script. 
@@ -45,6 +48,8 @@ In progress...
  
  
 ## API
+-------
+
 - start the engine and connect to Matlab; Load the model:
 
 ```
@@ -72,6 +77,8 @@ self.eng.eval('out.output'), self.eng.eval('out.tout')
 learn how to set parameters of blocks [check here](https://www.mathworks.com/help/simulink/slref/set_param.html)
 
 ## Reference:
+-------
+
 1. [link1](https://stackoverflow.com/questions/48864281/executing-step-by-step-a-simulink-model-from-python)
 2. [Calling MATLAB from Python](https://www.mathworks.com/help/matlab/matlab-engine-for-python.html)
 3. [Troubleshoot MATLAB Errors in Python](https://www.mathworks.com/help/matlab/matlab_external/troubleshoot-matlab-errors-in-python.html)
