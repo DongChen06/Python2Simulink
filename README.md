@@ -42,11 +42,11 @@ In progress...
 ## API
 - start the engine and connect to Matlab; Load the model:
 
-`matlab.engine.start_matlab()`
-
-`self.eng.eval("model = '{}'".format(self.modelName),nargout=0)`
-
-`self.eng.eval("load_system(model)",nargout=0)`
+```
+matlab.engine.start_matlab()
+self.eng.eval("model = '{}'".format(self.modelName),nargout=0)
+self.eng.eval("load_system(model)",nargout=0)
+ ```
 
 - eng.eval('out.output')
 
