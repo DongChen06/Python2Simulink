@@ -1,6 +1,11 @@
 # Python2Simulink
+===============
+#### Robotics and Intelligent Vehicle Automation Lab (RIVAL)
+- Built by Dong Chen
+- Started on Jan.11, 2020
+
 A bridge between Python and Simulink.
-This file aims to Call Simulink module with Python.
+This file aims to build a bridge between Python and Simulink. At each time step, the python script will send a command (input) to the simulink model, then the simulink model executes for one step and then returns the results to Python scripts for the decision usage. 
 
 ## Install MATLAB Engine API for Python
 
