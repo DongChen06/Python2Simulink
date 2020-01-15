@@ -10,6 +10,7 @@ class Simulink2Python:
 
     def setControlAction(self, u1, u2):
         # Helper Function to set value of control action
+        # here we can try set multiple value in one line, while I failed.
         self.eng.set_param('{}/u1'.format(self.modelName), 'value', str(u1), nargout=0)
         self.eng.set_param('{}/u2'.format(self.modelName), 'value', str(u2), nargout=0)
 
