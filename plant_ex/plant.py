@@ -19,7 +19,6 @@ class SimulinkPlant:
         #Helper Function to get Plant Output and Time History
         out = self.eng.workspace['out']
         return self.eng.eval('out.output'), self.eng.eval('out.tout'),
-        # return self.eng.workspace['output'],self.eng.workspace['tout']
         
     def connectToMatlab(self):
         print("Starting matlab")
