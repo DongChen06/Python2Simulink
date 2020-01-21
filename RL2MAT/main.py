@@ -8,7 +8,7 @@ import gym
 from deepq import deepq
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
-
+from .env.env_ford import FordEnv
 
 def model(inpt, num_actions, scope, reuse=False):
     """This model takes as input an observation and returns values of all actions."""
@@ -23,7 +23,7 @@ def model(inpt, num_actions, scope, reuse=False):
 def main():
     # Initialize environment
     print("Initializing environment")
-    env = CarlaEnv(action_smoothing=0.2,
+    env = FordEnv(action_smoothing=0.2,
                   synchronous=True, fps=30)
    #  env = gym.make("CartPole-v0")
 

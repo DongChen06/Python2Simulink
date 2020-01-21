@@ -92,7 +92,6 @@ if __name__ == "__main__":
             action[0] = -0.5
             action[0] = 0.5
             action[0] = np.clip(action[0], -1, 1)
-            action[1] = 1.0 if keys[K_UP] or keys[K_w] else 0.0
 
             # Take action
             obs, _, done, info = env.step(action)
