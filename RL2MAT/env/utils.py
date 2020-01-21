@@ -43,12 +43,16 @@ def run_step(eng, modelName, u1, u2):
     return obs
 
 
+def reward_fn():
+    pass
+
+
 def disconnect(eng, modelName):
     eng.set_param(modelName, 'SimulationCommand', 'stop', nargout=0)
     eng.quit()
 
 
-def initialize(tHist, x1Hist, xd1Hist):
+def initialize_plot(tHist, x1Hist, xd1Hist):
     # Initialize the graph
     fig1, = plt.plot(tHist, x1Hist)
     fig2, = plt.plot(tHist, xd1Hist)
