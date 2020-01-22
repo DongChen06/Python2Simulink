@@ -22,18 +22,18 @@ class FordEnv(gym.Env):
         This is the environment for ford project which is built on Matlab and python.
     """
 
-    def __init__(self, modelName='tracking', discrete=True, render=True, time_step=765):
+    def __init__(self, config, modelName='tracking', discrete=True, render=True, time_step=765):
         # Setup gym environment
-        self.modelName = modelName
-        self.render = render
-        self.time_step = time_step
+        self.modelName = config.get('modelName')
+        self.render = int(config.get('render'))
+        self.episode_length = int(config.get('episode_length'))
         self.seed(66)
         if discrete is True:
-            self.action_space = gym.spaces.Discrete(len(DISCRETE_ACTIONS))  # steer, throttle
+            self.action_space = gym.spaces.Discrete(len(DISCRETE_ACTIONS))  # engine torque, MG1 torque, MG2 torque
             self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(*obs_res, 3), dtype=np.float32)
         else:
             high = np.array([100, 20, 100])
-            self.action_space = gym.spaces.Box(np.array([-1, 0]), np.array([1, 1]), dtype=np.float32)  # steer, throttle
+            self.action_space = gym.spaces.Box(np.array([-1, 0]), np.array([1, 1]), dtype=np.float32)
             self.observation_space = gym.spaces.Box(-high, high, dtype=np.float32)
 
         try:
@@ -54,6 +54,8 @@ class FordEnv(gym.Env):
         self.step = 0
         # initialize plot
         initialize_plot(tHist, x1Hist, xd1Hist)
+        # reset the matlab model
+        self.obs = reset_env(self.eng, self.modelName)
 
     def close(self):
         disconnect(self.eng, self.modelName)
@@ -73,7 +75,7 @@ class FordEnv(gym.Env):
         if self.render:
             self.render()
 
-        if self.step >= self.time_step:
+        if self.step >= self.episode_length:
             self.terminal_state = True
 
         self.step += 1

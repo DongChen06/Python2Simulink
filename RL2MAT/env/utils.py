@@ -9,6 +9,8 @@ def connectToMatlab(eng, modelName):
     eng.eval("model = '{}'".format(modelName), nargout=0)
     eng.eval("load_system(model)", nargout=0)
 
+
+def reset_env(eng, modelName):
     # Initialize Control Action to 0
     setControlAction(eng, 0, 0, modelName)
     print("Initialized Model")
@@ -16,9 +18,7 @@ def connectToMatlab(eng, modelName):
     # Start Simulation and then Instantly pause
     eng.set_param(modelName, 'SimulationCommand', 'start', 'SimulationCommand', 'pause', nargout=0)
     obs = getObservations(eng)
-
     return obs
-
 
 def setControlAction(eng, u1, u2, modelName):
     # Helper Function to set value of control action
