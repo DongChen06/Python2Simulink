@@ -7,21 +7,13 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import argparse
 import configparser
 import gym
-from .agents.dqn import DQN
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
 from .env.env_ford import FordEnv
 from .utils import *
 from .trainer import *
+from .agents.models import IQL
 
-def model(inpt, num_actions, scope, reuse=False):
-    """This model takes as input an observation and returns values of all actions."""
-    with tf.variable_scope(scope, reuse=reuse):
-        out = inpt
-        out = layers.fully_connected(out, num_outputs=128, activation_fn=tf.nn.tanh)
-        out = layers.fully_connected(out, num_outputs=64, activation_fn=tf.nn.tanh)
-        out = layers.fully_connected(out, num_outputs=num_actions, activation_fn=None)
-        return out
 
 def parse_args():
     default_base_dir = 'C:\Users\Dong\PycharmProjects\Python2Simulink\RL2MAT\Data'
@@ -71,7 +63,7 @@ def train_fn(args):
 
     seed = config.getint('ENV_CONFIG', 'seed')
 
-    model = DQN()
+    model = IQL()
 
     summary_writer = tf.summary.FileWriter(dirs['log'])
     trainer = Trainer(env, model, global_counter, summary_writer, in_test, output_path=dirs['data'])

@@ -4,6 +4,7 @@ import tensorflow as tf
 import pandas as pd
 import time
 
+
 class Trainer():
     def __init__(self, env, model, global_counter, summary_writer, run_test, output_path=None):
         self.cur_step = 0
@@ -36,38 +37,30 @@ class Trainer():
             summ = self.sess.run(self.test_summary, {self.test_reward: reward})
         self.summary_writer.add_summary(summ, global_step=global_step)
 
-    def explore(self, prev_ob, prev_done):
+    def take_action(self, prev_ob, prev_done):
+        # take an action
         ob = prev_ob
         done = prev_done
         rewards = []
         for _ in range(self.n_step):
             if self.agent.endswith('a2c'):
                 policy, value = self.model.forward(ob, done)
-                # need to update fingerprint before calling step
-                if self.agent == 'ma2c':
-                    self.env.update_fingerprint(policy)
-                if self.agent == 'a2c':
-                    action = np.random.choice(np.arange(len(policy)), p=policy)
-                else:
-                    action = []
-                    for pi in policy:
-                        action.append(np.random.choice(np.arange(len(pi)), p=pi))
+                action = []
+                for pi in policy:
+                    action.append(np.random.choice(np.arange(len(pi)), p=pi))
             else:
                 action, policy = self.model.forward(ob, mode='explore')
             next_ob, reward, done, global_reward = self.env.step(action)
             rewards.append(global_reward)
             global_step = self.global_counter.next()
             self.cur_step += 1
-            if self.agent.endswith('a2c'):
-                self.model.add_transition(ob, action, reward, value, done)
-            else:
-                self.model.add_transition(ob, action, reward, next_ob, done)
+            self.model.add_transition(ob, action, reward, next_ob, done)
             # logging
-            if self.global_counter.should_log():
-                logging.info('''Training: global step %d, episode step %d,
-                                   ob: %s, a: %s, pi: %s, r: %.2f, train r: %.2f, done: %r''' %
-                             (global_step, self.cur_step,
-                              str(ob), str(action), str(policy), global_reward, np.mean(reward), done))
+            # if self.global_counter.should_log():
+            #     logging.info('''Training: global step %d, episode step %d,
+            #                        ob: %s, a: %s, pi: %s, r: %.2f, train r: %.2f, done: %r''' %
+            #                  (global_step, self.cur_step,
+            #                   str(ob), str(action), str(policy), global_reward, np.mean(reward), done))
             # # termination
             # if done:
             #     self.env.terminate()
@@ -80,16 +73,11 @@ class Trainer():
             if done:
                 break
             ob = next_ob
-        if self.agent.endswith('a2c'):
-            if done:
-                R = 0 if self.agent == 'a2c' else [0] * self.model.n_agent
-            else:
-                R = self.model.forward(ob, False, 'v')
-        else:
             R = 0
         return ob, done, R, rewards
 
-    def perform(self, test_ind, demo=False, policy_type='default'):
+    def evaluate(self, test_ind, demo=False, policy_type='default'):
+        # test function
         ob = self.env.reset(gui=demo, test_ind=test_ind)
         # note this done is pre-decision to reset LSTM states!
         done = True
@@ -136,7 +124,7 @@ class Trainer():
         done = False
         cum_reward = 0
         while not coord.should_stop():
-            ob, done, R, cum_reward = self.explore(ob, done, cum_reward)
+            ob, done, R, cum_reward = self.take_action(ob, done, cum_reward)
             global_step = self.global_counter.cur_step
             if self.agent.endswith('a2c'):
                 self.model.backward(R, self.summary_writer, global_step)
@@ -155,9 +143,9 @@ class Trainer():
             if self.run_test and self.global_counter.should_test():
                 rewards = []
                 global_step = self.global_counter.cur_step
-                self.env.train_mode = False
+                self.env.train_mode = False  # ToDO: for difference between test and training
                 for test_ind in range(self.test_num):
-                    mean_reward, std_reward = self.perform(test_ind)
+                    mean_reward, std_reward = self.evaluate(test_ind)
                     self.env.terminate()
                     rewards.append(mean_reward)
                     log = {'agent': self.agent,
@@ -170,25 +158,22 @@ class Trainer():
                 self._add_summary(avg_reward, global_step, is_train=False)
                 logging.info('Testing: global step %d, avg R: %.2f' %
                              (global_step, avg_reward))
+
             # train
             self.env.train_mode = True
             ob = self.env.reset()
-            # note this done is pre-decision to reset LSTM states!
             done = True
             self.model.reset()
             self.cur_step = 0
             rewards = []
             while True:
-                ob, done, R, cur_rewards = self.explore(ob, done)
+                ob, done, R, cur_rewards = self.take_action(ob, done)
                 rewards += cur_rewards
                 global_step = self.global_counter.cur_step
-                if self.agent.endswith('a2c'):
-                    self.model.backward(R, self.summary_writer, global_step)
-                else:
-                    self.model.backward(self.summary_writer, global_step)
+                self.model.backward(self.summary_writer, global_step)
                 # termination
                 if done:
-                    self.env.terminate()
+                    self.env.close()
                     break
             rewards = np.array(rewards)
             mean_reward = np.mean(rewards)
@@ -226,7 +211,7 @@ class Tester(Trainer):
         self.env.init_data(is_record, record_stats, self.output_path)
         rewards = []
         for test_ind in range(self.test_num):
-            rewards.append(self.perform(test_ind))
+            rewards.append(self.evaluate(test_ind))
             self.env.terminate()
             time.sleep(2)
             self.env.collect_tripinfo()
@@ -242,7 +227,7 @@ class Tester(Trainer):
                 rewards = []
                 global_step = self.global_counter.cur_step
                 for test_ind in range(self.test_num):
-                    cur_reward = self.perform(test_ind)
+                    cur_reward = self.evaluate(test_ind)
                     self.env.terminate()
                     rewards.append(cur_reward)
                     log = {'agent': self.agent,
@@ -277,7 +262,7 @@ class Evaluator(Tester):
         self.env.init_data(is_record, record_stats, self.output_path)
         time.sleep(1)
         for test_ind in range(self.test_num):
-            reward, _ = self.perform(test_ind, demo=self.demo, policy_type=self.policy_type)
+            reward, _ = self.evaluate(test_ind, demo=self.demo, policy_type=self.policy_type)
             self.env.terminate()
             logging.info('test %i, avg reward %.2f' % (test_ind, reward))
             time.sleep(2)
