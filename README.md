@@ -82,3 +82,4 @@ learn how to set parameters of blocks [check here](https://www.mathworks.com/hel
 1. [link1](https://stackoverflow.com/questions/48864281/executing-step-by-step-a-simulink-model-from-python)
 2. [Calling MATLAB from Python](https://www.mathworks.com/help/matlab/matlab-engine-for-python.html)
 3. [Troubleshoot MATLAB Errors in Python](https://www.mathworks.com/help/matlab/matlab_external/troubleshoot-matlab-errors-in-python.html)
+4. [Call User Scripts and Functions from Python](https://www.mathworks.com/help/matlab/matlab_external/call-user-script-and-function-from-python.html)
