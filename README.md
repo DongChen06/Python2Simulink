@@ -42,6 +42,9 @@ where the u1 and u2 are control input from the Python script. The state variable
      <br>Fig.3 Tracking result, x1(blue) and xd1(orange)
 </p>
 
+3. PV Control
+
+This model is based on the Tutorial [here](https://www.youtube.com/watch?v=A9FhgHS1JsE).
 
 ## Gym-like Reinforcement Learning interface combined with Python and Matlab
 
