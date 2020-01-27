@@ -42,6 +42,10 @@ where the u1 and u2 are control input from the Python script. The state variable
      <br>Fig.3 Tracking result, x1(blue) and xd1(orange)
 </p>
 
+3. PV Control
+
+This model is based on the Tutorial [here](https://www.youtube.com/watch?v=A9FhgHS1JsE).
+
 ## Gym-like Reinforcement Learning interface combined with Python and Matlab
 
 In progress...
@@ -82,3 +86,4 @@ learn how to set parameters of blocks [check here](https://www.mathworks.com/hel
 1. [link1](https://stackoverflow.com/questions/48864281/executing-step-by-step-a-simulink-model-from-python)
 2. [Calling MATLAB from Python](https://www.mathworks.com/help/matlab/matlab-engine-for-python.html)
 3. [Troubleshoot MATLAB Errors in Python](https://www.mathworks.com/help/matlab/matlab_external/troubleshoot-matlab-errors-in-python.html)
+4. [Call User Scripts and Functions from Python](https://www.mathworks.com/help/matlab/matlab_external/call-user-script-and-function-from-python.html)
