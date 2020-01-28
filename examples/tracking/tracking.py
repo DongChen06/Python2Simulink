@@ -16,7 +16,7 @@ class Simulink2Python:
 
     def getHistory(self):
         # Helper Function to get system Output and Time History
-        out = self.eng.workspace['out']
+        #out = self.eng.workspace['out']
         return self.eng.eval('out.x1'), self.eng.eval('out.x2'), self.eng.eval('out.tout')
 
     def connectToMatlab(self):
@@ -76,7 +76,7 @@ class Controller:
         plt.ylim(-0.5, 2)
         plt.ylabel("Output")
         plt.xlabel("Time(s)")
-        plt.legend('x1', 'xd1', loc='upper right')
+        #plt.legend('x1', 'xd1', loc='upper right')
         plt.title("System Response")
 
     def updateGraph(self):

@@ -19,16 +19,17 @@ def reset_env(eng, modelName):
     obs = getObservations(eng)
     return obs
 
-def setControlAction(eng, u1, u2, modelName):
+def setControlAction(eng, u1, modelName):
     # Helper Function to set value of control action
     eng.set_param('{}/u1'.format(modelName), 'value', str(u1), nargout=0)
 
 
 def getObservations(eng, ):
     # Helper Function to get system Output and Time History
-    out = eng.workspace['out']
-    return eng.eval('out.x1'), eng.eval('out.x2'), eng.eval('out.tout')
-
+    return (eng.eval('v_mph'), eng.eval('engine_spd'), eng.eval('MG1_spd'),
+           eng.eval('MG2_spd'), eng.eval('Acc_pad'), eng.eval('Dec_pad'),
+           eng.eval('WheelTD'), eng.eval('Fuel_kg'), eng.eval('SOC_C'),
+            eng.eval('target_speed'))
 
 def run_step(eng, modelName, u1, u2):
     # Control Loop
