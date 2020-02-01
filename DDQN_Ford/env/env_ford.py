@@ -107,7 +107,8 @@ class FordEnv(gym.Env):
 
     def step(self, action):
         if action is not None:
-            obs_new, self.last_reward, self.terminal_state, self.closed = self.engMAT.run_step(action)
+            obs_new, self.last_reward, self.terminal_state, self.closed = self.engMAT.run_step(
+                action)
 
         if self.rendering:
             self.render()
@@ -140,12 +141,12 @@ if __name__ == "__main__":
         last_reward = 0
 
         while True:
-            print('--------------')
+            # print('--------------')
             # print("steps = ", step)
             # print("rewards = ", last_reward)
             action = np.random.randint(action_size, size=1)
             # Take action
-            obs, last_reward, done, _ = env.step(action[0])  # action[0], 4
+            obs, last_reward, done, _ = env.step(4)  # action[0], 4
             rewards += last_reward
             if done:
                 break

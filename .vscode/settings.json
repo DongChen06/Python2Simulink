@@ -1,10 +1,10 @@
 {   
-    "python.unitTest.pyTestArgs": [
+    "python.testing.pytestArgs": [
     "GTGenerator/tests"
     ],
-    "python.unitTest.unittestEnabled": false,
-    "python.unitTest.nosetestsEnabled": false,
-    "python.unitTest.pyTestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true,
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -14,7 +14,7 @@
         "**/*.pyc": true
     },
     "python.linting.pylintEnabled": true,
-    "python.linting.pep8Enabled": true,
+    "python.linting.pycodestyleEnabled": true,
     "python.linting.enabled": true,
     "python.pythonPath": "C:\\Users\\Dong\\Anaconda3\\python.exe",
     "files.autoSave": "onWindowChange"
