@@ -48,7 +48,11 @@ This model is based on the Tutorial [here](https://www.youtube.com/watch?v=A9Fhg
 
 ## Gym-like Reinforcement Learning interface combined with Python and Matlab
 
-In progress...
+The Gym-like environment file is located in [DDQN_Ford](DDQN_Ford/) folder:
+
+- [env](DDQN_Ford/env/) folder contains the environment file.
+- [config](DDQN_Ford/config/) folder contains the system setting for RL model and environment.
+- [agent](DDQN_Ford/agents/) folder contains the RL model and policies.
  
  
 ## API
