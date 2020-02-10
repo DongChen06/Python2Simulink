@@ -8,9 +8,8 @@ class MatEng():
         self.model_address = r'C:\Users\Dong\Google Drive\Dong Chen\Ford_proj\CX482_IVA_PDP_EncryptedSimulinkModel'
         self.modelName = 'Cx482_IVA_forPDP_wDriverModel_realtime_v27_ProtecModel'
         self.eng = None
-        self.rendering = True
-
-    def reset_env(self, ):
+        
+    def reset_env(self, rendering=False):
         self.terminal_state = False
         self.last_reward = 0
         self.t = 0
@@ -26,7 +25,8 @@ class MatEng():
             self.eng.close("all", nargout=0)
             self.eng.bdclose("all", nargout=0)
             self.eng.clear("classes", nargout=0)
-            self.terminate_fig()
+            if rendering:
+                self.terminate_fig()
 
         # go to the model folder
         self.eng.cd(self.model_address, nargout=0)
@@ -45,7 +45,7 @@ class MatEng():
         self.eng.set_param(self.modelName, 'SimulationCommand',
                            'start', 'SimulationCommand', 'pause', nargout=0)
         obs = self.getObservations()
-        if self.rendering:
+        if rendering:
             # initialize plot
             self.initialize_plot()
         return obs
@@ -116,9 +116,6 @@ class MatEng():
         # print(self.t)
         # end = time.time()
         # print(end - start)
-
-        if (self.eng.get_param(self.modelName, 'SimulationStatus') == ('stopped' or 'terminating')):
-            self.terminal_state = True
         # start = time.time()
         obs = self.getObservations()
         # end = time.time()

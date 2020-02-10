@@ -57,11 +57,11 @@ class FordEnv(gym.Env):
 
     def __init__(self, config, modelName='tracking', discrete=True, render=True, time_step=765):
         # Setup gym environment
-
         self.modelName = config.get('modelName')
         self.model_address = config.get('modelAddress')
         # file name of parameters, we need to run it first
         self.rendering = int(config.get('render'))
+        self.sample_time = float(config.get('sample_time'))
         self.episode_length = int(config.get('episode_length'))
         self.seed(66)
 
@@ -94,7 +94,7 @@ class FordEnv(gym.Env):
     def reset(self, ):
         self.steps = 0
         # reset the matlab model
-        self.obs = self.engMAT.reset_env()
+        self.obs = self.engMAT.reset_env(self.rendering)
 
     def close(self):
         self.engMAT.disconnect()
@@ -104,19 +104,18 @@ class FordEnv(gym.Env):
 
     def step(self, action):
         if action is not None:
-            obs_new, self.last_reward, self.terminal_state, self.closed = self.engMAT.run_step(
+            obs_new, self.last_reward, self.terminal_state, _ = self.engMAT.run_step(
                 action)
 
         if self.rendering:
             self.render()
 
-        if self.steps >= self.episode_length - 1:
+        if self.steps >= int(self.episode_length / self.sample_time) - 1:
             self.terminal_state = True
 
         self.steps += 1
 
-        return obs_new, self.last_reward, self.terminal_state, {
-            "closed": self.closed}
+        return obs_new, self.last_reward, self.terminal_state, _
 
 
 if __name__ == "__main__":
@@ -129,21 +128,24 @@ if __name__ == "__main__":
     # Example of using FordEnv with sample controller
     env = FordEnv(config['ENV_CONFIG'])
     action_size = env.action_space.n
+    print('--------------')
+    print("Simulation starting...")
     while True:
         env.reset()
         rewards = 0
         last_reward = 0
-        step = 0
         while True:
-            print('--------------')
-            print("steps = ", step)
-            print("rewards = ", last_reward)
+            # print('--------------')
+            # print("steps = ", env.steps)
+            # print("rewards = ", last_reward)
             action = np.random.randint(action_size, size=1)
-            # Take action
+            # Take an action
             obs, last_reward, done, _ = env.step(4)  # action[0], 4
             rewards += last_reward
             if done:
                 break
-            step += 1
+        print('--------------')
+        print("steps = ", env.steps)
+        print("rewards = ", rewards)
         epoch += 1
     env.close()
