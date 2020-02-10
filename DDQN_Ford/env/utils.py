@@ -8,6 +8,7 @@ class MatEng():
         self.model_address = r'C:\Users\Dong\Google Drive\Dong Chen\Ford_proj\CX482_IVA_PDP_EncryptedSimulinkModel'
         self.modelName = 'Cx482_IVA_forPDP_wDriverModel_realtime_v27_ProtecModel'
         self.eng = None
+        self.rendering = True
 
     def reset_env(self, ):
         self.terminal_state = False
@@ -20,11 +21,12 @@ class MatEng():
         if self.eng == None:
             print("Starting matlab")
             self.eng = matlab.engine.start_matlab()
-        #else:
+        else:
             # reset matlab after one epoch
-            # self.eng.set_param(self.modelName, 'SimulationCommand', 'stop')
-            # self.eng.set_param(self.modelName, 'SimulationCommand', 'start')
-            # self.eng.clear('all', nargout=0)
+            self.eng.close("all", nargout=0)
+            self.eng.bdclose("all", nargout=0)
+            self.eng.clear("classes", nargout=0)
+            self.terminate_fig()
 
         # go to the model folder
         self.eng.cd(self.model_address, nargout=0)
@@ -37,10 +39,15 @@ class MatEng():
 
         self.setControlAction(0)
         print("Initialized Model")
+        # enable fast restart
+        self.eng.set_param(self.modelName, 'FastRestart', 'on',  nargout=0)
         # Start Simulation and then Instantly pause
         self.eng.set_param(self.modelName, 'SimulationCommand',
                            'start', 'SimulationCommand', 'pause', nargout=0)
         obs = self.getObservations()
+        if self.rendering:
+            # initialize plot
+            self.initialize_plot()
         return obs
 
     def setControlAction(self,  u1):
@@ -89,8 +96,8 @@ class MatEng():
             return (v_mph[-1][0], engine_spd[-1][0], MG1_spd[-1][0], MG2_spd[-1][0], Acc_pad[-1][0], Dec_pad[-1][0], WheelTD[-1][0])
 
     def run_step(self, action):
-        # u1 = -50 + (action + 1) * 10
-        u1 = -200
+        u1 = -50 + (action + 1) * 10
+        # u1 = -200
         # if u1 < 0:
         #     u1 = 0
         # u1 = -10 + (action + 1) * 2
@@ -138,12 +145,13 @@ class MatEng():
 
     def initialize_plot(self, ):
         # Initialize the graph
+        self.fig = plt.figure()
         self.fig1, = plt.plot(self.tHist, self.x1Hist,
                               color='red', linewidth=1)
         self.fig2, = plt.plot(self.tHist, self.x2Hist, color='k', linewidth=1)
         # for speed tracking
         plt.xlim(0, 800)
-        plt.ylim(-10, 150)
+        plt.ylim(-10, 100)
         # engine torque
         # plt.xlim(0, 800)
         # plt.ylim(-50, 400)
@@ -164,3 +172,7 @@ class MatEng():
         plt.ion()
         plt.pause(0.001)
         plt.show()
+
+    def terminate_fig(self,):
+        plt.close(self.fig)
+        # plt.close(self.fig2)

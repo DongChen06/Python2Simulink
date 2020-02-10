@@ -95,9 +95,6 @@ class FordEnv(gym.Env):
         self.steps = 0
         # reset the matlab model
         self.obs = self.engMAT.reset_env()
-        if self.rendering:
-            # initialize plot
-            self.engMAT.initialize_plot()
 
     def close(self):
         self.engMAT.disconnect()
@@ -113,8 +110,8 @@ class FordEnv(gym.Env):
         if self.rendering:
             self.render()
 
-        """ if self.steps >= self.episode_length:
-            self.terminal_state = True """
+        if self.steps >= self.episode_length - 1:
+            self.terminal_state = True
 
         self.steps += 1
 
@@ -129,9 +126,6 @@ if __name__ == "__main__":
     config = configparser.ConfigParser()
     config.read(config_dir)
     epoch = 0
-    rewards = 0
-    last_reward = 0
-    step = 0
     # Example of using FordEnv with sample controller
     env = FordEnv(config['ENV_CONFIG'])
     action_size = env.action_space.n
@@ -139,11 +133,11 @@ if __name__ == "__main__":
         env.reset()
         rewards = 0
         last_reward = 0
-
+        step = 0
         while True:
-            # print('--------------')
-            # print("steps = ", step)
-            # print("rewards = ", last_reward)
+            print('--------------')
+            print("steps = ", step)
+            print("rewards = ", last_reward)
             action = np.random.randint(action_size, size=1)
             # Take action
             obs, last_reward, done, _ = env.step(4)  # action[0], 4
@@ -151,8 +145,5 @@ if __name__ == "__main__":
             if done:
                 break
             step += 1
-
-        print("epoch = ", epoch)
-        print("rewards = ", rewards)
         epoch += 1
-        env.close()
+    env.close()
