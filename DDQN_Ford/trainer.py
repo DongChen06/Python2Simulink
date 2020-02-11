@@ -6,14 +6,15 @@ import time
 
 
 class Trainer():
-    def __init__(self, env, model, global_counter, summary_writer, run_test, output_path=None):
+    def __init__(self, env, model, global_counter, summary_writer, run_test, output_path=None, rendering=False):
         self.cur_step = 0
+        self.rendering = rendering
         self.global_counter = global_counter
         self.env = env
         self.agent = 'iql'  # TODO
         self.model = model
         self.sess = self.model.sess
-        self.n_step = self.model.n_step
+        self.n_step = self.model.n_step  # bacth size
         self.summary_writer = summary_writer
         self.run_test = run_test  # ToDo 
         # assert self.env.T % self.n_step == 0
@@ -40,7 +41,7 @@ class Trainer():
         self.summary_writer.add_summary(summ, global_step=global_step)
 
     def take_action(self, prev_ob, prev_done):
-        # take an action
+        #  take actions for a batch size
         ob = prev_ob
         done = prev_done
         rewards = 0  # ori = []
@@ -53,31 +54,16 @@ class Trainer():
             else:
                 action, policy = self.model.forward(ob, mode='explore')
             next_ob, reward, done, _ = self.env.step(action[0])  # ori = action, global_reward
-            # self.env.render()
+            if self.rendering:
+                self.env.render()
             rewards += reward
             global_step = self.global_counter.next()
             self.cur_step += 1
             self.model.add_transition(ob, action, reward, next_ob, done)
-            # logging
-            # if self.global_counter.should_log():
-            #     logging.info('''Training: global step %d, episode step %d,
-            #                        ob: %s, a: %s, pi: %s, r: %.2f, train r: %.2f, done: %r''' %
-            #                  (global_step, self.cur_step,
-            #                   str(ob), str(action), str(policy), global_reward, np.mean(reward), done))
-            # # termination
-            # if done:
-            #     self.env.terminate()
-            #     time.sleep(2)
-            #     ob = self.env.reset()
-            #     self._add_summary(cum_reward / float(self.cur_step), global_step)
-            #     cum_reward = 0
-            #     self.cur_step = 0
-            # else:
             if done:
                 break
             ob = next_ob
-        R = 0
-        return ob, done, R, rewards
+        return ob, done, _, rewards
 
     def evaluate(self, test_ind, demo=False, policy_type='default'):
         # test function
@@ -123,28 +109,9 @@ class Trainer():
         std_reward = np.std(np.array(rewards))
         return mean_reward, std_reward
 
-    def run_thread(self, coord):
-        '''Multi-threading is disabled'''
-        ob = self.env.reset()
-        done = False
-        cum_reward = 0
-        while not coord.should_stop():
-            ob, done, R, cum_reward = self.take_action(ob, done, cum_reward)
-            global_step = self.global_counter.cur_step
-            if self.agent.endswith('a2c'):
-                self.model.backward(R, self.summary_writer, global_step)
-            else:
-                self.model.backward(self.summary_writer, global_step)
-            self.summary_writer.flush()
-            if (self.global_counter.should_stop()) and (not coord.should_stop()):
-                self.env.terminate()
-                coord.request_stop()
-                logging.info('Training: stop condition reached!')
-                return
-
     def run(self):
         while not self.global_counter.should_stop():
-            # test
+            # test or not
             if self.run_test and self.global_counter.should_test():
                 rewards = []
                 global_step = self.global_counter.cur_step
@@ -165,22 +132,21 @@ class Trainer():
                              (global_step, avg_reward))
 
             # train
-            self.env.train_mode = True  # ToDo
             ob = self.env.reset()
             done = True
             self.model.reset()
             self.cur_step = 0
             rewards = []
             while True:
-                ob, done, R, cur_rewards = self.take_action(ob, done)
+                ob, done, _, cur_rewards = self.take_action(ob, done)
                 rewards.append(cur_rewards)  # ori
                 global_step = self.global_counter.cur_step
+                # update network for each bach size steps
                 self.model.backward(self.summary_writer, global_step)
                 # termination
                 if done:
-                    self.env.close()
                     break
-            rewards = np.array(rewards)
+            rewards = np.array(rewards)  # reward for one epoch
             mean_reward = np.mean(rewards)
             std_reward = np.std(rewards)
             log = {'agent': self.agent,
@@ -191,7 +157,7 @@ class Trainer():
             self.data.append(log)
             self._add_summary(mean_reward, global_step)
             self.summary_writer.flush()
-        df = pd.DataFrame(self.data)
+        df = pd.DataFrame(self.data) # data: dictionary
         df.to_csv(self.output_path + 'train_reward.csv')
 
 
