@@ -50,7 +50,7 @@ class QPolicy:
                 grads, max_grad_norm)
         self.lr = tf.placeholder(tf.float32, [])
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr)
-        self._train = self.optimizer.apply_gradients(list(zip(grads, wts)))
+        self._train = self.optimizer.apply_gradients(list(zip(grads, wts)))        
         # monitor training
         if self.name.endswith('_0a'):
             summaries = []
