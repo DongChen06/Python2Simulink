@@ -29,7 +29,7 @@ class A2C:
         config = tf.ConfigProto(allow_soft_placement=True)
         self.sess = tf.Session(config=config)
         self.policy = self._init_policy(n_s, n_a, n_f, model_config)
-        self.saver = tf.train.Saver(max_to_keep=5)
+        self.saver = tf.train.Saver(max_to_keep=15)
         if total_step:
             # training
             self.total_step = total_step
@@ -37,7 +37,7 @@ class A2C:
             self._init_train(model_config)
         self.sess.run(tf.global_variables_initializer())
 
-    def _init_policy(self, n_s, n_a, n_w, n_f, model_config, agent_name=None):
+    def _init_policy(self, n_s, n_a, n_f, model_config, agent_name=None):
         n_fw = model_config.getint('num_fw')
         n_ft = model_config.getint('num_ft')
         n_lstm = model_config.getint('num_lstm')
@@ -67,7 +67,8 @@ class A2C:
         self.trans_buffer = OnPolicyBuffer(gamma)
 
     def save(self, model_dir, global_step):
-        self.saver.save(self.sess, model_dir + 'checkpoint', global_step=global_step)
+        self.saver.save(self.sess, model_dir + 'checkpoint',
+                        global_step=global_step)
 
     def load(self, model_dir, checkpoint=None):
         save_file = None
@@ -116,7 +117,7 @@ class A2C:
 
 
 class IQL(A2C):
-    def __init__(self, n_s_ls, n_a_ls, n_w_ls, total_step, model_config, seed=0, model_type='dqn'):
+    def __init__(self, n_s_ls, n_a_ls, total_step, model_config, seed=0, model_type='dqn'):
         self.name = 'iql'
         self.model_type = model_type
         self.agents = []
@@ -125,7 +126,6 @@ class IQL(A2C):
         self.reward_norm = model_config.getfloat('reward_norm')
         self.n_s_ls = n_s_ls
         self.n_a_ls = n_a_ls
-        self.n_w_ls = n_w_ls
         self.n_step = model_config.getint('batch_size')
         # init tf
         tf.reset_default_graph()
@@ -133,9 +133,9 @@ class IQL(A2C):
         config = tf.ConfigProto(allow_soft_placement=True)
         self.sess = tf.Session(config=config)
         self.policy_ls = []
-        for i, (n_s, n_a, n_w) in enumerate(zip(self.n_s_ls, self.n_a_ls, self.n_w_ls)):
+        for i, (n_s, n_a) in enumerate(zip(self.n_s_ls, self.n_a_ls)):
             # agent_name is needed to differentiate multi-agents
-            self.policy_ls.append(self._init_policy(n_s, n_a, n_w, model_config,
+            self.policy_ls.append(self._init_policy(n_s, n_a, model_config,
                                                     agent_name='{:d}a'.format(i)))
         self.saver = tf.train.Saver(max_to_keep=5)
         if total_step:
@@ -146,11 +146,11 @@ class IQL(A2C):
         self.cur_step = 0
         self.sess.run(tf.global_variables_initializer())
 
-    def _init_policy(self, n_s, n_a, n_w, model_config, agent_name=None):
+    def _init_policy(self, n_s, n_a, model_config, agent_name=None):
         if self.model_type == 'dqn':
             n_h = model_config.getint('num_h')
             n_fc = model_config.getint('num_fc')
-            policy = DeepQPolicy(n_s - n_w, n_a, n_w, self.n_step, n_fc0=n_fc, n_fc=n_h,
+            policy = DeepQPolicy(n_s, n_a, self.n_step, n_fc0=n_fc, n_fc=n_h,
                                  name=agent_name)
         return policy
 
@@ -163,7 +163,8 @@ class IQL(A2C):
             self.lr_scheduler = Scheduler(lr_init, decay=lr_decay)
         else:
             lr_min = model_config.getfloat('lr_min')
-            self.lr_scheduler = Scheduler(lr_init, lr_min, self.total_step, decay=lr_decay)
+            self.lr_scheduler = Scheduler(
+                lr_init, lr_min, self.total_step, decay=lr_decay)
         if eps_decay == 'constant':
             self.eps_scheduler = Scheduler(eps_init, decay=eps_decay)
         else:
@@ -183,26 +184,30 @@ class IQL(A2C):
             self.trans_buffer_ls.append(ReplayBuffer(buffer_size, self.n_step))
 
     def backward(self, summary_writer=None, global_step=None):
+        # update networks
         cur_lr = self.lr_scheduler.get(self.n_step)
         if self.trans_buffer_ls[0].size < self.trans_buffer_ls[0].batch_size:
             return
         for i in range(self.n_agent):
             for k in range(10):
-                obs, acts, next_obs, rs, dones = self.trans_buffer_ls[i].sample_transition()
+                obs, acts, next_obs, rs, dones = self.trans_buffer_ls[i].sample_transition(
+                )
                 if i == 0:
-                    self.policy_ls[i].backward(self.sess, obs, acts, next_obs, dones, rs, cur_lr,
+                    self.policy_ls[i].backward(self.sess, obs, np.squeeze(acts), next_obs, dones, rs, cur_lr,
                                                summary_writer=summary_writer,
                                                global_step=global_step + k)
                 else:
-                    self.policy_ls[i].backward(self.sess, obs, acts, next_obs, dones, rs, cur_lr)
+                    self.policy_ls[i].backward(
+                        self.sess, obs, acts, next_obs, dones, rs, cur_lr)
 
     def forward(self, obs, mode='act', stochastic=False):
+        # get actions and policies
         if mode == 'explore':
             eps = self.eps_scheduler.get(1)
         action = []
         qs_ls = []
         for i in range(self.n_agent):
-            qs = self.policy_ls[i].forward(self.sess, obs[i])
+            qs = self.policy_ls[i].forward(self.sess, obs)  # here we only have one agent, ori = obs[i]
             if (mode == 'explore') and (np.random.random() < eps):
                 action.append(np.random.randint(self.n_a_ls[i]))
             else:
@@ -219,10 +224,11 @@ class IQL(A2C):
         return
 
     def add_transition(self, obs, actions, rewards, next_obs, done):
+        # add experiences to buffers accordingly
         if (self.reward_norm):
             rewards = rewards / self.reward_norm
         if self.reward_clip:
             rewards = np.clip(rewards, -self.reward_clip, self.reward_clip)
         for i in range(self.n_agent):
-            self.trans_buffer_ls[i].add_transition(obs[i], actions[i],
-                                                   rewards[i], next_obs[i], done)
+            self.trans_buffer_ls[i].add_transition(obs, actions,
+                                                   rewards, next_obs, done)  # ori = obs[i], actions[i], rewards[i], next_obs[i]

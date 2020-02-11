@@ -28,12 +28,11 @@ def find_file(cur_dir, suffix='.ini'):
 
 
 def init_dir(base_dir, pathes=['log', 'data', 'model']):
-    # initialize folders: log, data and model
     if not os.path.exists(base_dir):
         os.mkdir(base_dir)
     dirs = {}
     for path in pathes:
-        cur_dir = base_dir + '/%s/' % path
+        cur_dir = base_dir + "/%s/" % path
         if not os.path.exists(cur_dir):
             os.mkdir(cur_dir)
         dirs[path] = cur_dir
@@ -44,13 +43,13 @@ def init_log(log_dir):
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s',
                         level=logging.INFO,
                         handlers=[
-                            logging.FileHandler('%s/%d.log' % (log_dir, time.time())),
+                            logging.FileHandler('%s/%d.log' %
+                                                (log_dir, time.time())),
                             logging.StreamHandler()
                         ])
 
 
 def init_test_flag(test_mode):
-    # test during training, test after training
     if test_mode == 'no_test':
         return False, False
     if test_mode == 'in_train_test':
@@ -65,8 +64,10 @@ def init_test_flag(test_mode):
 def plot_train(data_dirs, labels):
     pass
 
+
 def plot_evaluation(data_dirs, labels):
     pass
+
 
 class Counter:
     def __init__(self, total_step, test_step, log_step):

@@ -2,6 +2,7 @@ import numpy as np
 import tensorflow as tf
 from .utils import *
 
+
 class QPolicy:
     def __init__(self, n_a, n_s, n_step, policy_name, agent_name):
         self.name = policy_name
@@ -26,12 +27,13 @@ class QPolicy:
 
     def prepare_loss(self, max_grad_norm, gamma):
         self.A = tf.placeholder(tf.int32, [self.n_step])
-        self.S1 = tf.placeholder(tf.float32, [self.n_step, self.n_s + self.n_w])
+        self.S1 = tf.placeholder(
+            tf.float32, [self.n_step, self.n_s])
         self.R = tf.placeholder(tf.float32, [self.n_step])
         self.DONE = tf.placeholder(tf.bool, [self.n_step])
         A_sparse = tf.one_hot(self.A, self.n_a)
 
-        # backward
+        # backward, calculate loss
         with tf.variable_scope(self.name + '_q', reuse=True):
             q0s = self._build_net(self.S)
             q0 = tf.reduce_sum(q0s * A_sparse, axis=1)
@@ -44,37 +46,38 @@ class QPolicy:
         wts = tf.trainable_variables(scope=self.name)
         grads = tf.gradients(self.loss, wts)
         if max_grad_norm > 0:
-            grads, self.grad_norm = tf.clip_by_global_norm(grads, max_grad_norm)
+            grads, self.grad_norm = tf.clip_by_global_norm(
+                grads, max_grad_norm)
         self.lr = tf.placeholder(tf.float32, [])
         self.optimizer = tf.train.AdamOptimizer(learning_rate=self.lr)
         self._train = self.optimizer.apply_gradients(list(zip(grads, wts)))
         # monitor training
         if self.name.endswith('_0a'):
             summaries = []
-            summaries.append(tf.summary.scalar('train/%s_loss' % self.name, self.loss))
-            summaries.append(tf.summary.scalar('train/%s_q' % self.name, tf.reduce_mean(q0)))
-            summaries.append(tf.summary.scalar('train/%s_tq' % self.name, tf.reduce_mean(tq)))
-            summaries.append(tf.summary.scalar('train/%s_gradnorm' % self.name, self.grad_norm))
+            summaries.append(tf.summary.scalar(
+                'train/%s_loss' % self.name, self.loss))
+            summaries.append(tf.summary.scalar('train/%s_q' %
+                                               self.name, tf.reduce_mean(q0)))
+            summaries.append(tf.summary.scalar('train/%s_tq' %
+                                               self.name, tf.reduce_mean(tq)))
+            summaries.append(tf.summary.scalar(
+                'train/%s_gradnorm' % self.name, self.grad_norm))
             self.summary = tf.summary.merge(summaries)
 
 
 class DeepQPolicy(QPolicy):
-    def __init__(self, n_s, n_a, n_w, n_step, n_fc0=128, n_fc=64, name=None):
+    def __init__(self, n_s, n_a, n_step, n_fc0=128, n_fc=64, name=None):
         super().__init__(n_a, n_s, n_step, 'dqn', name)
         self.n_fc = n_fc
         self.n_fc0 = n_fc0
-        self.n_w = n_w
-        self.S = tf.placeholder(tf.float32, [None, n_s + n_w])
+        self.S = tf.placeholder(tf.float32, [None, n_s])
         with tf.variable_scope(self.name + '_q'):
             self.qvalues = self._build_net(self.S)
 
     def _build_net(self, S):
-        if self.n_w == 0:
-            h = fc(S, 'q_fcw', self.n_fc0)
-        else:
-            h0 = fc(S[:, :self.n_s], 'q_fcw', self.n_fc0)
-            h1 = fc(S[:, self.n_s:], 'q_fct', self.n_fc0 / 4)
-            h = tf.concat([h0, h1], 1)
+        h0 = fc(S[:, :self.n_s], 'q_fcw', self.n_fc0)
+        h1 = fc(S[:, self.n_s:], 'q_fct', self.n_fc0 / 4)
+        h = tf.concat([h0, h1], 1)
         return self._build_fc_net(h, [self.n_fc])
 
     def forward(self, sess, ob):

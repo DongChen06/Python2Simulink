@@ -8,17 +8,18 @@ initializers
 DEFAULT_SCALE = np.sqrt(2)
 DEFAULT_MODE = 'fan_in'
 
+
 def ortho_init(scale=DEFAULT_SCALE, mode=None):
     def _ortho_init(shape, dtype, partition_info=None):
         # lasagne ortho init for tf
         shape = tuple(shape)
-        if len(shape) == 2: # fc: in, out
+        if len(shape) == 2:  # fc: in, out
             flat_shape = shape
-        elif (len(shape) == 3) or (len(shape) == 4): # 1d/2dcnn: (in_h), in_w, in_c, out
+        elif (len(shape) == 3) or (len(shape) == 4):  # 1d/2dcnn: (in_h), in_w, in_c, out
             flat_shape = (np.prod(shape[:-1]), shape[-1])
         a = np.random.standard_normal(flat_shape)
         u, _, v = np.linalg.svd(a, full_matrices=False)
-        q = u if u.shape == flat_shape else v # pick the one with the correct shape
+        q = u if u.shape == flat_shape else v  # pick the one with the correct shape
         q = q.reshape(shape)
         return (scale * q).astype(np.float32)
     return _ortho_init
@@ -40,14 +41,18 @@ def norm_init(scale=DEFAULT_SCALE, mode=DEFAULT_MODE):
             n = 0.5 * (n_in + shape[-1])
         return (scale * a / np.sqrt(n)).astype(np.float32)
 
+
 DEFAULT_METHOD = ortho_init
 """
 layers
 """
+
+
 def conv(x, scope, n_out, f_size, stride=1, pad='VALID', f_size_w=None, act=tf.nn.relu,
          conv_dim=1, init_scale=DEFAULT_SCALE, init_mode=None, init_method=DEFAULT_METHOD):
     with tf.variable_scope(scope):
-        b = tf.get_variable("b", [n_out], initializer=tf.constant_initializer(0.0))
+        b = tf.get_variable(
+            "b", [n_out], initializer=tf.constant_initializer(0.0))
         if conv_dim == 1:
             n_c = x.shape[2].value
             w = tf.get_variable("w", [f_size, n_c, n_out],
@@ -59,7 +64,8 @@ def conv(x, scope, n_out, f_size, stride=1, pad='VALID', f_size_w=None, act=tf.n
                 f_size_w = f_size
             w = tf.get_variable("w", [f_size, f_size_w, n_c, n_out],
                                 initializer=init_method(init_scale, init_mode))
-            z = tf.nn.conv2d(x, w, strides=[1, stride, stride, 1], padding=pad) + b
+            z = tf.nn.conv2d(
+                x, w, strides=[1, stride, stride, 1], padding=pad) + b
         return act(z)
 
 
@@ -69,7 +75,8 @@ def fc(x, scope, n_out, act=tf.nn.relu, init_scale=DEFAULT_SCALE,
         n_in = x.shape[1].value
         w = tf.get_variable("w", [n_in, n_out],
                             initializer=init_method(init_scale, init_mode))
-        b = tf.get_variable("b", [n_out], initializer=tf.constant_initializer(0.0))
+        b = tf.get_variable(
+            "b", [n_out], initializer=tf.constant_initializer(0.0))
         z = tf.matmul(x, w) + b
         return act(z)
 
@@ -97,7 +104,8 @@ def lstm(xs, dones, s, scope, init_scale=DEFAULT_SCALE, init_mode=DEFAULT_MODE,
                              initializer=init_method(init_scale, init_mode))
         wh = tf.get_variable("wh", [n_out, n_out*4],
                              initializer=init_method(init_scale, init_mode))
-        b = tf.get_variable("b", [n_out*4], initializer=tf.constant_initializer(0.0))
+        b = tf.get_variable(
+            "b", [n_out*4], initializer=tf.constant_initializer(0.0))
     s = tf.expand_dims(s, 0)
     c, h = tf.split(axis=1, num_or_size_splits=2, value=s)
     for ind, (x, done) in enumerate(zip(xs, dones)):
@@ -132,15 +140,15 @@ def test_layers():
     conv1_out = conv(conv1_x, 'conv1', 10, 4, conv_dim=1)
     conv2_out = conv(conv2_x, 'conv2', 10, 4, conv_dim=2)
     sess.run(tf.global_variables_initializer())
-    inputs = {'fc': {fc_x:np.random.randn(n_step, 10)},
-              'lstm_done': {lstm_x:np.zeros((n_step, 2)),
-                            lstm_done:np.ones(n_step),
-                            lstm_s:np.random.randn(20)},
-              'lstm': {lstm_x:np.random.randn(n_step, 2),
-                       lstm_done:np.zeros(n_step),
-                       lstm_s:np.random.randn(20)},
-              'conv1': {conv1_x:np.random.randn(n_step, 8, 1)},
-              'conv2': {conv2_x:np.random.randn(n_step, 8, 8, 1)}}
+    inputs = {'fc': {fc_x: np.random.randn(n_step, 10)},
+              'lstm_done': {lstm_x: np.zeros((n_step, 2)),
+                            lstm_done: np.ones(n_step),
+                            lstm_s: np.random.randn(20)},
+              'lstm': {lstm_x: np.random.randn(n_step, 2),
+                       lstm_done: np.zeros(n_step),
+                       lstm_s: np.random.randn(20)},
+              'conv1': {conv1_x: np.random.randn(n_step, 8, 1)},
+              'conv2': {conv2_x: np.random.randn(n_step, 8, 8, 1)}}
     outputs = {'fc': [fc_out], 'lstm_done': [lstm_out, lstm_ns],
                'conv1': [conv1_out], 'conv2': [conv2_out],
                'lstm': [lstm_out, lstm_ns]}
@@ -150,7 +158,8 @@ def test_layers():
         for wt in wts:
             wt_val = wt.eval(sess)
             print(wt_val.shape)
-            print(np.mean(wt_val), np.std(wt_val), np.min(wt_val), np.max(wt_val))
+            print(np.mean(wt_val), np.std(wt_val),
+                  np.min(wt_val), np.max(wt_val))
     print('=====================================')
     for x_name in inputs:
         print(x_name)
@@ -161,9 +170,12 @@ def test_layers():
         else:
             print(out[0].shape)
 
+
 """
 buffers
 """
+
+
 class TransBuffer:
     def reset(self):
         self.buffer = []
@@ -262,9 +274,12 @@ class ReplayBuffer(TransBuffer):
     def size(self):
         return min(self.buffer_size, self.cum_size)
 
+
 """
 util functions
 """
+
+
 class Scheduler:
     def __init__(self, val_init, val_min=0, total_step=0, decay='linear'):
         self.val = val_init

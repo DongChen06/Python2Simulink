@@ -10,13 +10,13 @@ class Trainer():
         self.cur_step = 0
         self.global_counter = global_counter
         self.env = env
-        self.agent = self.env.agent
+        self.agent = 'iql'  # TODO
         self.model = model
         self.sess = self.model.sess
         self.n_step = self.model.n_step
         self.summary_writer = summary_writer
-        self.run_test = run_test
-        assert self.env.T % self.n_step == 0
+        self.run_test = run_test  # ToDo 
+        # assert self.env.T % self.n_step == 0
         self.data = []
         self.output_path = output_path
         if run_test:
@@ -26,13 +26,15 @@ class Trainer():
 
     def _init_summary(self):
         self.train_reward = tf.placeholder(tf.float32, [])
-        self.train_summary = tf.summary.scalar('train_reward', self.train_reward)
+        self.train_summary = tf.summary.scalar(
+            'train_reward', self.train_reward)
         self.test_reward = tf.placeholder(tf.float32, [])
         self.test_summary = tf.summary.scalar('test_reward', self.test_reward)
 
     def _add_summary(self, reward, global_step, is_train=True):
         if is_train:
-            summ = self.sess.run(self.train_summary, {self.train_reward: reward})
+            summ = self.sess.run(self.train_summary, {
+                                 self.train_reward: reward})
         else:
             summ = self.sess.run(self.test_summary, {self.test_reward: reward})
         self.summary_writer.add_summary(summ, global_step=global_step)
@@ -41,7 +43,7 @@ class Trainer():
         # take an action
         ob = prev_ob
         done = prev_done
-        rewards = []
+        rewards = 0  # ori = []
         for _ in range(self.n_step):
             if self.agent.endswith('a2c'):
                 policy, value = self.model.forward(ob, done)
@@ -50,8 +52,9 @@ class Trainer():
                     action.append(np.random.choice(np.arange(len(pi)), p=pi))
             else:
                 action, policy = self.model.forward(ob, mode='explore')
-            next_ob, reward, done, global_reward = self.env.step(action)
-            rewards.append(global_reward)
+            next_ob, reward, done, _ = self.env.step(action[0])  # ori = action, global_reward
+            # self.env.render()
+            rewards += reward
             global_step = self.global_counter.next()
             self.cur_step += 1
             self.model.add_transition(ob, action, reward, next_ob, done)
@@ -73,7 +76,7 @@ class Trainer():
             if done:
                 break
             ob = next_ob
-            R = 0
+        R = 0
         return ob, done, R, rewards
 
     def evaluate(self, test_ind, demo=False, policy_type='default'):
@@ -93,14 +96,16 @@ class Trainer():
                     self.env.update_fingerprint(policy)
                 if self.agent == 'a2c':
                     if policy_type != 'deterministic':
-                        action = np.random.choice(np.arange(len(policy)), p=policy)
+                        action = np.random.choice(
+                            np.arange(len(policy)), p=policy)
                     else:
                         action = np.argmax(np.array(policy))
                 else:
                     action = []
                     for pi in policy:
                         if policy_type != 'deterministic':
-                            action.append(np.random.choice(np.arange(len(pi)), p=pi))
+                            action.append(np.random.choice(
+                                np.arange(len(pi)), p=pi))
                         else:
                             action.append(np.argmax(np.array(pi)))
             else:
@@ -160,7 +165,7 @@ class Trainer():
                              (global_step, avg_reward))
 
             # train
-            self.env.train_mode = True
+            self.env.train_mode = True  # ToDo
             ob = self.env.reset()
             done = True
             self.model.reset()
@@ -168,7 +173,7 @@ class Trainer():
             rewards = []
             while True:
                 ob, done, R, cur_rewards = self.take_action(ob, done)
-                rewards += cur_rewards
+                rewards.append(cur_rewards)  # ori
                 global_step = self.global_counter.cur_step
                 self.model.backward(self.summary_writer, global_step)
                 # termination
@@ -262,7 +267,8 @@ class Evaluator(Tester):
         self.env.init_data(is_record, record_stats, self.output_path)
         time.sleep(1)
         for test_ind in range(self.test_num):
-            reward, _ = self.evaluate(test_ind, demo=self.demo, policy_type=self.policy_type)
+            reward, _ = self.evaluate(
+                test_ind, demo=self.demo, policy_type=self.policy_type)
             self.env.terminate()
             logging.info('test %i, avg reward %.2f' % (test_ind, reward))
             time.sleep(2)

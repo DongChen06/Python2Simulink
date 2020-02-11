@@ -60,9 +60,9 @@ class FordEnv(gym.Env):
         self.modelName = config.get('modelName')
         self.model_address = config.get('modelAddress')
         # file name of parameters, we need to run it first
-        self.rendering = int(config.get('render'))
-        self.sample_time = float(config.get('sample_time'))
-        self.episode_length = int(config.get('episode_length'))
+        self.rendering = int(config.getfloat('render'))
+        self.sample_time = config.getfloat('sample_time')
+        self.episode_length = int(config.getfloat('episode_length'))
         self.seed(66)
 
         low = np.array([0, -1e4, -1e4, -1e4, 0, 0, -1e4])
