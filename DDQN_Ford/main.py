@@ -17,7 +17,7 @@ from agents.models import IQL
 
 def parse_args():
     default_base_dir = '/home/derek/PycharmProjects/Python2Simulink/DDQN_Ford/Data'
-    default_config_dir = '/home/derek/PycharmProjects/Python2Simulink/DDQN_Ford/config/config_gym.ini'
+    default_config_dir = '/home/derek/PycharmProjects/Python2Simulink/DDQN_Ford/config/config_ford.ini'
     parser = argparse.ArgumentParser()
     parser.add_argument('--base-dir', type=str, required=False,
                         default=default_base_dir, help="experiment base dir")
@@ -48,8 +48,8 @@ def train_fn(args):
 
     # Initialize environment
     print("Initializing environment")
-    # env = FordEnv(config['ENV_CONFIG'])
-    env = gym.make("CartPole-v0")
+    env = FordEnv(config['ENV_CONFIG'])
+    # env = gym.make("CartPole-v0")
     n_s = env.observation_space.shape
     logging.info('Training: s dim: %d, a dim %d' %
                  (n_s[0], env.action_space.n))
@@ -59,7 +59,6 @@ def train_fn(args):
     total_step = int(config.getfloat('TRAIN_CONFIG', 'total_step'))
     test_step = int(config.getfloat('TRAIN_CONFIG', 'test_interval'))
     log_step = int(config.getfloat('TRAIN_CONFIG', 'log_interval'))
-    rendering = int(config.getfloat('TRAIN_CONFIG', 'rendering'))
     global_counter = Counter(total_step, test_step, log_step)
 
     seed = config.getint('ENV_CONFIG', 'seed')
@@ -69,7 +68,7 @@ def train_fn(args):
 
     summary_writer = tf.summary.FileWriter(dirs['log'])
     trainer = Trainer(env, model, global_counter,
-                      summary_writer, in_test, output_path=dirs['data'], rendering=rendering )
+                      summary_writer, in_test, output_path=dirs['data'])
     trainer.run()
 
     # post-training test
