@@ -1,6 +1,9 @@
 import matlab.engine
 import numpy as np
 
+import sys
+sys.path.append("../")
+
 import gym
 import argparse
 import configparser
@@ -8,14 +11,14 @@ import time
 import random
 from collections import deque
 from gym.utils import seeding
-from utils import *
+from env.utils import *
 
 
 discrete_resolution = 10
 
 
 def parse_args():
-    default_base_dir = r'C:\Users\Dong\PycharmProjects\Python2Simulink\DDQN_Ford\Data'
+    default_base_dir = '/home/derek/PycharmProjects/Python2Simulink/DDQN_Ford/Data'
     default_config_dir = 'DDQN_Ford\config\config_ford.ini'
     parser = argparse.ArgumentParser()
     parser.add_argument('--base-dir', type=str, required=False,
@@ -55,12 +58,12 @@ class FordEnv(gym.Env):
         1	Push cart to the right
     """
 
-    def __init__(self, config, modelName='tracking', discrete=True, render=True, time_step=765):
+    def __init__(self, config, modelName='tracking', discrete=True, time_step=765):
         # Setup gym environment
         self.modelName = config.get('modelName')
         self.model_address = config.get('modelAddress')
         # file name of parameters, we need to run it first
-        self.rendering = int(config.getfloat('render'))
+        self.rendering = int(config.getfloat('rendering'))
         self.sample_time = config.getfloat('sample_time')
         self.episode_length = int(config.getfloat('episode_length'))
         self.seed(66)
