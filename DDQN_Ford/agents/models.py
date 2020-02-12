@@ -189,9 +189,8 @@ class IQL(A2C):
         if self.trans_buffer_ls[0].size < self.trans_buffer_ls[0].batch_size:
             return
         for i in range(self.n_agent):
-            for k in range(10):
-                obs, acts, next_obs, rs, dones = self.trans_buffer_ls[i].sample_transition(
-                )
+            for k in range(10):  # update network 10 times
+                obs, acts, next_obs, rs, dones = self.trans_buffer_ls[i].sample_transition()
                 if i == 0:
                     self.policy_ls[i].backward(self.sess, obs, np.squeeze(acts), next_obs, dones, rs, cur_lr,
                                                summary_writer=summary_writer,
