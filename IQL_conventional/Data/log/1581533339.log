@@ -1,0 +1,7 @@
+2020-02-12 13:48:59,838 [INFO] Training: s dim: 4, a dim 2
+2020-02-12 13:48:59,867 [WARNING] From /home/derek/anaconda3/envs/msa3.6/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py:263: colocate_with (from tensorflow.python.framework.ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Colocations handled automatically by placer.
+2020-02-12 13:49:00,198 [WARNING] From /home/derek/anaconda3/envs/msa3.6/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py:3066: to_int32 (from tensorflow.python.ops.math_ops) is deprecated and will be removed in a future version.
+Instructions for updating:
+Use tf.cast instead.
