@@ -1,2 +1,0 @@
-2020-02-12 13:40:03,466 [INFO] Training: s dim: 7, a dim 10
-2020-02-12 13:40:07,224 [WARNING] Tensor._shape is private, use Tensor.shape instead. Tensor._shape will eventually be removed.
