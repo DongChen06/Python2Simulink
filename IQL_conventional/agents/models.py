@@ -1,8 +1,3 @@
-"""
-A2C, IA2C, MA2C models
-@author: Tianshu Chu
-"""
-
 import os
 from .utils import *
 from .policies import *
@@ -230,4 +225,4 @@ class IQL(A2C):
             rewards = np.clip(rewards, -self.reward_clip, self.reward_clip)
         for i in range(self.n_agent):
             self.trans_buffer_ls[i].add_transition(obs, actions,
-                                                   rewards, next_obs, done)  # ori = obs[i], actions[i], rewards[i], next_obs[i]
+                                                   rewards, next_obs, done)
