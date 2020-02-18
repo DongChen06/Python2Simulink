@@ -2,7 +2,7 @@ from __future__ import print_function, division
 import os
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 import argparse
 import configparser
@@ -16,8 +16,8 @@ from agents.models import IQL
 
 
 def parse_args():
-    default_base_dir = '/home/derek/PycharmProjects/Python2Simulink/DDQN_Ford/Data'
-    default_config_dir = '/home/derek/PycharmProjects/Python2Simulink/DDQN_Ford/config/config_ford.ini'
+    default_base_dir = 'Data'
+    default_config_dir = 'config/config_gym.ini'
     parser = argparse.ArgumentParser()
     parser.add_argument('--base-dir', type=str, required=False,
                         default=default_base_dir, help="experiment base dir")

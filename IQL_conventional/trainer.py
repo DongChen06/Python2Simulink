@@ -115,7 +115,6 @@ class Trainer():
             if self.run_test and self.global_counter.should_test():
                 rewards = []
                 global_step = self.global_counter.cur_step
-                self.env.train_mode = False  # ToDO: for difference between test and training
                 for test_ind in range(self.test_num):
                     mean_reward, std_reward = self.evaluate(test_ind)
                     self.env.terminate()
